@@ -1,9 +1,7 @@
 package utils;
-import java.io.File;
+import java.io.OutputStream;
 import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -12,38 +10,25 @@ import org.w3c.dom.Element;
 import model.Note;
 
 public class XmlBackup {
-    public static void exportxml(File file, List<Note> notes) {
+    public static void exportxml(OutputStream os, List<Note> notes) {
         try {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.newDocument();
+            Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            Element root = doc.createElement("NoteList");
+            doc.appendChild(root);
 
-            Element rootElement = doc.createElement("NoteList");
-            doc.appendChild(rootElement);
-
-            for (Note note : notes) {
-                Element nElement = doc.createElement("Note");
-                rootElement.appendChild(nElement);
-
-                Element id = doc.createElement("Id");
-                id.appendChild(doc.createTextNode(String.valueOf(note.id)));
-                nElement.appendChild(id);
+            for (Note n : notes) {
+                Element noteEl = doc.createElement("Note");
+                root.appendChild(noteEl);
 
                 Element title = doc.createElement("Title");
-                title.appendChild(doc.createTextNode(note.title));
-                nElement.appendChild(title);
+                title.appendChild(doc.createTextNode(n.title));
+                noteEl.appendChild(title);
 
                 Element content = doc.createElement("Content");
-                content.appendChild(doc.createTextNode(note.content));
-                nElement.appendChild(content);
+                content.appendChild(doc.createTextNode(n.content));
+                noteEl.appendChild(content);
             }
-
-            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-            Transformer transformer = transformerFactory.newTransformer();
-            DOMSource source = new DOMSource(doc);
-            StreamResult result = new StreamResult(file);
-            transformer.transform(source, result);
-
+            TransformerFactory.newInstance().newTransformer().transform(new DOMSource(doc), new StreamResult(os));
         } catch (Exception e) { e.printStackTrace(); }
     }
 }

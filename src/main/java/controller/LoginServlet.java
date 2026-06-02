@@ -4,7 +4,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
 
-@WebServlet("/api/login")
+@WebServlet("/login")
 public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -16,10 +16,21 @@ public class LoginServlet extends HttpServlet {
 
         if ("register".equals(action)) {
             boolean ok = dao.register(u, p);
-            resp.getWriter().write(ok ? "success" : "fail");
+            if (ok) {
+                resp.sendRedirect("index.jsp?msg=Register success! Please login.");
+            } else {
+                resp.sendRedirect("register.jsp?err=Username already exists!");
+            }
         } else {
             int userId = dao.login(u, p);
-            resp.getWriter().write(String.valueOf(userId));
+            if (userId != -1) {
+                HttpSession session = req.getSession();
+                session.setAttribute("userId", userId);
+                session.setAttribute("username", u);
+                resp.sendRedirect("main.jsp");
+            } else {
+                resp.sendRedirect("index.jsp?err=Invalid username or password!");
+            }
         }
     }
 }

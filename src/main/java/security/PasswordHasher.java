@@ -14,8 +14,6 @@ public class PasswordHasher {
                 hexString.append(hex);
             }
             return hexString.toString();
-        } catch (Exception e) {
-            return null;
-        }
+        } catch (Exception e) { return null; }
     }
 }
